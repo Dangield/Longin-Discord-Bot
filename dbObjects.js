@@ -38,6 +38,14 @@ Users.prototype.removeCard = async function(card) {
     }
 };
 
+Users.prototype.hasCard = async function(card) {
+    const userCard = await UserCards.findOne({
+        where: { user_id: this.user_id, card_id: card.id },
+    });
+    if (userCard) return 10 > 0;
+    return 10 < 0;
+}
+
 Users.prototype.getCards = function() {
     return UserCards.findAll({
         where: { user_id: this.user_id },

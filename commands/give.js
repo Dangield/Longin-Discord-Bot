@@ -2,9 +2,10 @@ const { Users, CardCompendium } = require('../dbObjects');
 
 module.exports = {
 	name: 'give',
-	description: 'Gives card to the user.',
+	description: 'Gives card to the user (owner only).',
 	args: true,
 	usage: '[user_mention] [card_name]',
+	guildOnly: true,
 	async execute(message, args) {
 		if (message.channel.type !== 'dm' && message.author.id !== message.guild.ownerID){
 			return message.reply('Only owner can do it on the server.')
@@ -19,6 +20,8 @@ module.exports = {
 		const card = await CardCompendium.findOne({ where: { name: cardName } });
 		if (!card) return message.channel.send('There is no such card!');
 		await user.addCard(card);
+		user.numOfCards += 1;
+		user.save();
 		return message.channel.send(`${target.tag} obtained ${cardName} card.`);
 	},
 };

@@ -1,7 +1,8 @@
 module.exports = {
 	name: 'prune',
-	description: 'Prune up to 99 messages.',
+	description: 'Prune up to 99 messages (owner only).',
 	usage: '[num_of_messages]',
+	guildOnly: true,
 	execute(message, args) {
 		if (message.channel.type !== 'dm' && message.author.id !== message.guild.ownerID){
 			return message.reply('Only owner can do it on the server.')
