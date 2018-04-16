@@ -8,6 +8,9 @@ const fs = require('fs');
 // create a new Discord client
 const bot = new Discord.Client();
 
+// load tables from database
+const { Users, CardCompendium } = require('./dbObjects');
+
 // create collection of commands
 bot.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands');
@@ -29,8 +32,8 @@ const cooldowns = new Discord.Collection();
 bot.on('ready', () => {
     console.log('Ready!');
 	// bot.user.setUsername('Longin');
-	bot.user.setActivity(prefix + 'help');
 	// bot.user.setAvatar('./longin_avatar.png');
+	bot.user.setActivity(prefix + 'help');
 });
 
 bot.on('message', message => {

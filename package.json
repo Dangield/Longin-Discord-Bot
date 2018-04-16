@@ -6,6 +6,8 @@
   "author": "Daniel Giełdowski",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^11.3.2"
+    "discord.js": "^11.3.2",
+    "sequelize": "^4.37.6",
+    "sqlite3": "^4.0.0"
   }
 }
