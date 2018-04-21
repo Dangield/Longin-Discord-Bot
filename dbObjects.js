@@ -1,4 +1,5 @@
-const Sequelize = require('sequelize');
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op;
 
 const sequelize = new Sequelize('database', 'username', 'password', {
     host: 'localhost',
@@ -23,7 +24,7 @@ Users.prototype.addCard = async function(card) {
         return userCard.save();
     }
 
-    return UserCards.create({ user_id: this.user_id, card_id: card.id, amount: 1 });
+    return UserCards.create({ user_id: this.user_id, card_id: card.id, amount: 1 , inDeck: 0});
 };
 
 Users.prototype.removeCard = async function(card) {
@@ -42,13 +43,44 @@ Users.prototype.hasCard = async function(card) {
     const userCard = await UserCards.findOne({
         where: { user_id: this.user_id, card_id: card.id },
     });
-    if (userCard) return 10 > 0;
-    return 10 < 0;
+    if (userCard) return true;
+    return false;
 }
 
 Users.prototype.getCards = function() {
     return UserCards.findAll({
         where: { user_id: this.user_id },
+        include: ['card'],
+    });
+};
+
+Users.prototype.addToDeck = async function(card) {
+    const userCard = await UserCards.findOne({
+        where: { user_id: this.user_id, card_id: card.id },
+    });
+
+    if (userCard && userCard.amount > userCard.inDeck) {
+        userCard.inDeck += 1;
+        return userCard.save();
+    }
+    return false;
+}
+
+Users.prototype.removeFromDeck = async function(card) {
+    const userCard = await UserCards.findOne({
+        where: { user_id: this.user_id, card_id: card.id },
+    });
+
+    if (userCard  && userCard.inDeck > 0) {
+        userCard.inDeck -= 1;
+        return userCard.save();
+    }
+    return false;
+}
+
+Users.prototype.getDeck = function() {
+    return UserCards.findAll({
+        where: { user_id: this.user_id, inDeck: {[Op.gt]: 0} },
         include: ['card'],
     });
 };

@@ -7,6 +7,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             default: 0,
         },
+        inDeck: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            default: 0,
+        },
     }, {
         timestamps: false,
     });
