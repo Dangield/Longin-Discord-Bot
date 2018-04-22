@@ -12,9 +12,6 @@ module.exports = {
 		if (!user) user = await Users.create({ user_id: target.id, numOfCards: 0});
 		const cards = await user.getCards();
 		if (!cards.length) return message.channel.send(`${target.tag} has nothing!`);
-		// message.channel.send(`${target.tag} currently has:${cards.map(i => {
-		// 	return `\n${i.amount} ${i.card.name} --> ${i.card.body} ${i.card.mind} ${i.card.flair} ${i.card.charm}`; 
-		// }).join('')}`);
 		replyMessage = new Discord.RichEmbed({title: `${target.username}'s collection of ${user.numOfCards} cards`});
 		replyMessage.setColor('#FFFFFF');
 		replyMessage.addField('Amount', `${cards.map(i => `${i.amount}`).join('\n')}`, true);

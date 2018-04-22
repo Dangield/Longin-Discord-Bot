@@ -19,6 +19,9 @@ Users.prototype.addCard = async function(card) {
         where: { user_id: this.user_id, card_id: card.id },
     });
 
+    this.numOfCards += 1;
+    this.save();
+
     if (userCard) {
         userCard.amount += 1;
         return userCard.save();
@@ -33,10 +36,16 @@ Users.prototype.removeCard = async function(card) {
     });
 
     if (userCard) {
+        this.numOfCards -=1;
+        if (this.numOfCards < 0) this.numOfCards = 0;
+        this.save();
         userCard.amount -= 1;
-        if (userCard.amount > 0) return userCard.save();
-        return userCard.destroy();
+        if (userCard.amount < 1) return userCard.destroy();
+        if (userCard.inDeck > userCard.amount) userCard.inDeck -= 1;
+        return userCard.save();
+        // return userCard.destroy();
     }
+    return false;
 };
 
 Users.prototype.hasCard = async function(card) {
@@ -60,6 +69,8 @@ Users.prototype.addToDeck = async function(card) {
     });
 
     if (userCard && userCard.amount > userCard.inDeck) {
+        this.cardsInDeck += 1;
+        this.save();
         userCard.inDeck += 1;
         return userCard.save();
     }
@@ -72,6 +83,8 @@ Users.prototype.removeFromDeck = async function(card) {
     });
 
     if (userCard  && userCard.inDeck > 0) {
+        this.cardsInDeck -= 1;
+        this.save();
         userCard.inDeck -= 1;
         return userCard.save();
     }

@@ -14,11 +14,7 @@ module.exports = {
 		cardName = cardName.join(' ');
 		const card = await CardCompendium.findOne({ where: { name: cardName } });
 		if (!card) return message.channel.send('There is no such card!');
-		if (await  user.addToDeck(card)) {
-			user.cardsInDeck += 1;
-			user.save();
-			return message.channel.send(`${target.tag} added ${cardName} to deck.`);
-		}
+		if (await  user.addToDeck(card)) return message.channel.send(`${target.tag} added ${cardName} to deck.`);
 		return message.channel.send(`You don't have enough of ${cardName} cards.`);
 	},
 };

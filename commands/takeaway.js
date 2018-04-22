@@ -20,10 +20,7 @@ module.exports = {
 		cardName = cardName.join(' ');
 		const card = await CardCompendium.findOne({ where: { name: cardName } });
 		if (!card) return message.channel.send('There is no such card!');
-		await user.removeCard(card);
-		user.numOfCards -= 1;
-		if (user.numOfCards < 0) user.numOfCards = 0;
-		user.save();
-		return message.channel.send(`${target.tag} lost ${cardName} card.`);
+		if (await user.removeCard(card)) return message.channel.send(`${target.tag} lost ${cardName} card.`);
+		return message.channel.send(`Sth went wrong.`);
 	},
 };

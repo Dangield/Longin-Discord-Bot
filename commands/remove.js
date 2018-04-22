@@ -5,7 +5,6 @@ module.exports = {
 	description: 'Takes card away from the user (owner only).',
 	args: true,
 	usage: '[user_mention] [card_name]',
-	aliases: 'take',
 	guildOnly: true,
 	async execute(message, args) {
 		const target = message.author;
@@ -15,11 +14,7 @@ module.exports = {
 		cardName = cardName.join(' ');
 		const card = await CardCompendium.findOne({ where: { name: cardName } });
 		if (!card) return message.channel.send('There is no such card!');
-		if (await user.removeFromDeck(card)) {
-			user.cardsInDeck -= 1;
-			user.save();
-			return message.channel.send(`${target.tag} removed ${cardName} card from deck.`);
-		}
+		if (await user.removeFromDeck(card)) return message.channel.send(`${target.tag} removed ${cardName} card from deck.`);
 		return message.channel.send(`${cardName} card cannot be removed from deck.`);
 	},
 };
