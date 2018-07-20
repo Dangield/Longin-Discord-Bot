@@ -40,8 +40,13 @@ Users.prototype.removeCard = async function(card) {
         if (this.numOfCards < 0) this.numOfCards = 0;
         this.save();
         userCard.amount -= 1;
+        userCard.save();
+        if (userCard.inDeck > userCard.amount) {
+            userCard.inDeck -= 1;
+            this.cardsInDeck -= 1;
+            this.save();
+        }
         if (userCard.amount < 1) return userCard.destroy();
-        if (userCard.inDeck > userCard.amount) userCard.inDeck -= 1;
         return userCard.save();
         // return userCard.destroy();
     }
