@@ -4,6 +4,8 @@
 2. get into the folder
 3. install discord and database packages:
 
+sudo apt-get install nodejs-legacy
+
 npm install --save discord.js
 
 npm install --save sequelize
