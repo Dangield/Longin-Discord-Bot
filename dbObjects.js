@@ -11,8 +11,11 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 const Users = sequelize.import('models/Users');
 const CardCompendium = sequelize.import('models/CardCompendium');
 const UserCards = sequelize.import('models/UserCards');
+const Duels = sequelize.import('models/Duels');
+const DuelCards = sequelize.import('models/DuelCards');
 
 UserCards.belongsTo(CardCompendium, { foreignKey: 'card_id', as: 'card' });
+DuelCards.belongsTo(CardCompendium, { foreignKey: 'card_id', as: 'card' });
 
 Users.prototype.addCard = async function(card) {
     const userCard = await UserCards.findOne({
@@ -103,4 +106,23 @@ Users.prototype.getDeck = function() {
     });
 };
 
-module.exports = { Users, CardCompendium, UserCards };
+Users.prototype.setDuel = function(value) {
+    if (value == 1 || value == 0) {
+        this.inDuel = value;
+        return this.save();
+    }
+    return false;
+};
+
+Users.prototype.addCardToDuel = function(card) {
+    return  DuelCards.create({ user_id: this.user_id, card_id: card.id});
+};
+
+Users.prototype.getDuelCards = function() {
+    return DuelCards.findAll({
+        where: {user_id: this.user_id},
+        include: ['card'],
+    });
+};
+
+module.exports = { Users, CardCompendium, UserCards, Duels, DuelCards };
