@@ -48,11 +48,12 @@ module.exports = {
 		user2.setDuel(true);
 		str = 'montage ';
 		for (i = 0; i < 16; i++) {
-			str += 'card1.jpg ';
+			str += 'img/back.jpg ';
 		}
-		str += `-tile 4x4 -geometry +1+1 ${duel.id}.jpg`;
+		str += `-tile 4x4 -geometry +1+1 img/duels/${duel.id}.jpg`;
 		const { stdout, stderr } = await exec(str);
-		duel.table = str;
+		duel.table = `img/duels/${duel.id}.jpg`;
+		duel.save()
 
 		// get current decks
 		const deck1 = await user1.getDeck();

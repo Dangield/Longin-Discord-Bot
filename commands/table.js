@@ -19,8 +19,8 @@ module.exports = {
 			})
 		}
 
-		return message.channel.send(`Image`, {
-			files: [`./${duel.id}.jpg`]
+		return message.channel.send({
+			files: [`./${duel.table}`]
 		});
 
 	},
