@@ -1,0 +1,5 @@
+.old_for_js_version/
+commands/__pycache__/
+.env
+*.log
+sftp-config.json
