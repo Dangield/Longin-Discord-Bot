@@ -83,8 +83,9 @@ bot.add_cog(TabooCommands(bot))
 # 	if not existing_channel:
 # 		print(f'Creating a new channel: {channel_name}')
 # 		await guild.create_text_channel(channel_name)	# delete previous message
-# @bot.command(name = 'del', help = 'delete previous message')
-# async def delete_previous_message(self, ctx):
-# 	await ctx.message.channel.purge(limit = 2)
+@bot.command(name = 'del', help = 'delete set aomount of previous messages (admin only)')
+@commands.has_permissions(administrator=True)
+async def delete_previous_message(ctx, a = '1'):
+	await ctx.message.channel.purge(limit = int(a)+1)
 # run bot
 bot.run(TOKEN)
