@@ -1,5 +1,7 @@
 .old_for_js_version/
 commands/__pycache__/
 .env
-*.log
+cmd.log
+err.log
 sftp-config.json
+yaml/*.yaml
