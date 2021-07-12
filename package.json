@@ -7,7 +7,7 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^11.3.2",
-    "sequelize": "^4.37.6",
+    "sequelize": "^5.15.1",
     "sqlite3": "^4.0.0"
   }
 }
