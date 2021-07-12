@@ -73,7 +73,8 @@ bot = Bot(command_prefix = '?', intents = intents, activity = activity)
 bot.add_cog(TestCommands(bot))
 bot.add_cog(RPGCommands(bot))
 bot.add_cog(MusicCommands(bot))
-bot.add_cog(TabooCommands(bot))
+# bot.add_cog(TabooCommands(bot))
+
 # add no category commands
 # @bot.command(name='create-channel', help = 'Creates a new text channel with specified name')
 # @commands.is_owner()
@@ -83,9 +84,11 @@ bot.add_cog(TabooCommands(bot))
 # 	if not existing_channel:
 # 		print(f'Creating a new channel: {channel_name}')
 # 		await guild.create_text_channel(channel_name)	# delete previous message
+
 @bot.command(name = 'del', help = 'delete set aomount of previous messages (admin only)')
 @commands.has_permissions(administrator=True)
 async def delete_previous_message(ctx, a = '1'):
 	await ctx.message.channel.purge(limit = int(a)+1)
+
 # run bot
 bot.run(TOKEN)
