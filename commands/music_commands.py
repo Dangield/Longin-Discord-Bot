@@ -17,28 +17,12 @@ class MusicCommands(commands.Cog, name = 'Music commands'):
 		self.ignoreLoop = False
 
 	# play music
-	@commands.command(name = 'play', brief = 'Play music from youtube.', help = 'Play music from youtube. Pass an url or a song name.')
+	@commands.command(name = 'play', brief = 'Play music from youtube.', help = 'Play music from youtube. Pass an youtube url or a song name.')
 	async def play(self, ctx, *, url_or_name):
-		# voice client doesn't exist
-		if self.vclient is None:
-			if ctx.author.voice is None:
-				await ctx.send('You are not connected to any voice channel, moron.')
-				return
-			self.vchannel = ctx.author.voice.channel
-			self.vclient = await self.vchannel.connect()
-
-		# voice client exists but is not connected
-		if not self.vclient.is_connected():
-			self.vchannel = ctx.author.voice.channel
-			self.vclient = await self.vchannel.connect()
-
-		# bot was on a different channel before
-		if self.vchannel is not ctx.author.voice.channel:
-			self.vchannel = ctx.author.voice.channel
-			if self.vclient.is_connected():
-				await self.vclient.move_to(self.vchannel)
-			else:
-				self.vclient = await self.vchannel.connect()
+		# message author is not in voice channel
+		if ctx.author.voice is None:
+			await ctx.send(ctx.author.mention + ', you are not connected to any voice channel.')
+			return
 
 		# url_or_name is a youtube url
 		if 'youtube' in url_or_name:
@@ -68,7 +52,25 @@ class MusicCommands(commands.Cog, name = 'Music commands'):
 		# add songs to playlist
 		for e in entries:
 			self.playlist.append((e['title'], e['url']))
-			await ctx.send('Added \'' + str(e['title']) + '\' to playlist.')
+			await ctx.send(ctx.author.mention + ' added \'' + str(e['title']) + '\' to playlist.')
+
+		# voice client doesn't exist
+		if self.vclient is None:
+			self.vchannel = ctx.author.voice.channel
+			self.vclient = await self.vchannel.connect()
+
+		# voice client exists but is not connected
+		if not self.vclient.is_connected():
+			self.vchannel = ctx.author.voice.channel
+			self.vclient = await self.vchannel.connect()
+
+		# bot was on a different channel before
+		if self.vchannel is not ctx.author.voice.channel:
+			self.vchannel = ctx.author.voice.channel
+			if self.vclient.is_connected():
+				await self.vclient.move_to(self.vchannel)
+			else:
+				self.vclient = await self.vchannel.connect()
 
 		# if not already playing, then play
 		if (not self.vclient.is_playing()) and (not self.vclient.is_paused()):
@@ -191,6 +193,8 @@ class MusicCommands(commands.Cog, name = 'Music commands'):
 			coro = self.vclient.disconnect()
 			fut = asyncio.run_coroutine_threadsafe(coro, self.vclient.loop)
 			fut.result()
+		elif len(self.playlist) is 0:
+			return
 		else:
 			if (not self.playInLoop) or self.ignoreLoop:
 				del self.playlist[0]
