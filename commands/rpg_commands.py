@@ -10,14 +10,10 @@ class RPGCommands(commands.Cog, name = 'RPG commands'):
 	def __init__(self, bot):
 		self.bot = bot
 
-	# roll dice axccording to the rule, +/-
-	@commands.command(name='roll', aliases = ['r'], brief='Simulates rolling dice.', help = 'The command can simulate any dice roll that consists of adding, subtracting or multiplying different dices and positive numbers, e.g. 1d3+2d3-2x2-1d3x2. Use the letter `x` instead of multiplication sign. This is passed as a `rule` argument. The optional `name` argument allows the user to set the title of the roll.')
-	async def roll(self, ctx, rule = '1d20', name = None):
-		# Split rule into operators and arguments
-		operators = ['+', '-', 'x']
-		arguments = re.split('|'.join(map(re.escape, operators)), rule)
-		operations = [c if c in operators else '' for c in rule]
-		operations = list(filter(lambda a: a != '', operations))
+	def perform_roll(self, rule):
+		# Split rule into operations and arguments
+		arguments = re.split('\\+|\\-|x', rule)
+		operations = list(filter(lambda a: a in ['+', '-', 'x'], rule))
 		# Init lists
 		rolls = []
 		values = []
@@ -29,13 +25,10 @@ class RPGCommands(commands.Cog, name = 'RPG commands'):
 					dice = arg[1:]
 				else:
 					[amount, dice] = arg.split('d')
-				l_rolls = []
-				l_values = 0
-				for i in range(int(amount)):
-					l_rolls.append(str(random.choice(range(1, int(dice) + 1))))
-					l_values += int(l_rolls[-1])
-				rolls.append(l_rolls)
-				values.append(l_values)
+				if dice is '':
+					dice = 20
+				rolls.append([str(random.choice(range(1, int(dice) + 1))) for i in range(int(amount))])
+				values.append(sum([int(roll) for roll in rolls[-1]]))
 			else:
 				rolls.append(None)
 				values.append(int(arg))
@@ -48,7 +41,27 @@ class RPGCommands(commands.Cog, name = 'RPG commands'):
 			operations.remove('x')
 			del values[i+1]
 		final_sum = sum([values[0]] + [values[i+1] if operations[i] is '+' else -values[i+1] for i in range(len(operations))])
-		await ctx.send(('' if name is None else name + ': ') + ' = '.join([response, str(final_sum)]))
+		return response, final_sum
+
+	# roll dice according to the rule, +/-/x
+	@commands.command(name='roll', aliases = ['r'], brief='Simulates rolling dice.', help = 'The command can simulate any dice roll that consists of adding, subtracting or multiplying different dices and positive numbers, e.g. 1d3+2d3-2x2-1d3x2. Use the letter `x` instead of multiplication sign. This is passed as a `rule` argument. The optional `name` argument allows the user to set the title of the roll.')
+	async def roll(self, ctx, rule = '1d20', *, name = None):
+		response, final_sum = self.perform_roll(rule)
+		await ctx.send(ctx.author.mention + ('' if name is None else ' ' + name) + ': ' + ' = '.join([response, str(final_sum)]))
+
+	# roll the same dice multiple times
+	@commands.command(name='multiroll', aliases = ['rr'], brief = 'Simulates rolling the same dice set amount of times.', help = 'Makes the same dice roll multiple times. First argument `amount` is the number of rolls to do. Second is `rule` argument is the actual roll to be made (see roll command). At the end you may set the roll\'s `name` (optional).')
+	async def multiroll(self, ctx, amount = '2', rule = '1d20', *, name = None):
+		full_response = ctx.author.mention + ('' if name is None else ' ' + name) + ':'
+		try:
+			if int(amount) > 30:
+				raise ValueError
+			for i in range(int(amount)):
+				response, final_sum = self.perform_roll(rule)
+				full_response += '\n' + ' = '.join([response, str(final_sum)])
+			await ctx.send(full_response)
+		except ValueError:
+			await ctx.send(ctx.author.mention + ', you can\'t perform more than 30 rolls in one multiroll.')
 
 	# roll classical dnd stats
 	@commands.command(name='dnd_stats', aliases = ['dnds'], help='Rolls statistics for dnd character in classical way.')
