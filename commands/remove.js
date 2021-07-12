@@ -1,26 +1,20 @@
 const { Users, CardCompendium } = require('../dbObjects');
 
 module.exports = {
-	name: 'takeaway',
+	name: 'remove',
 	description: 'Takes card away from the user (owner only).',
 	args: true,
 	usage: '[user_mention] [card_name]',
-	aliases: 'take',
 	guildOnly: true,
 	async execute(message, args) {
-		if (message.channel.type !== 'dm' && message.author.id !== message.guild.ownerID){
-			return message.reply('Only owner can do it on the server.')
-		}
-		const target = message.mentions.users.first();
-		if (!target) return  message.channel.send('No user mentioned!')
+		const target = message.author;
 		user = await Users.findByPrimary(target.id);
 		if (!user) return message.channel.send("User does not have any cards!");
 		cardName = args;
-		cardName.shift();
 		cardName = cardName.join(' ');
 		const card = await CardCompendium.findOne({ where: { name: cardName } });
 		if (!card) return message.channel.send('There is no such card!');
-		if (await user.removeCard(card)) return message.channel.send(`${target.tag} lost ${cardName} card.`);
-		return message.channel.send(`Sth went wrong.`);
+		if (await user.removeFromDeck(card)) return message.channel.send(`${target.tag} removed ${cardName} card from deck.`);
+		return message.channel.send(`${cardName} card cannot be removed from deck.`);
 	},
 };

@@ -19,9 +19,7 @@ module.exports = {
 		cardName = cardName.join(' ');
 		const card = await CardCompendium.findOne({ where: { name: cardName } });
 		if (!card) return message.channel.send('There is no such card!');
-		await user.addCard(card);
-		user.numOfCards += 1;
-		user.save();
-		return message.channel.send(`${target.tag} obtained ${cardName} card.`);
+		if (await user.addCard(card)) return message.channel.send(`${target.tag} obtained ${cardName} card.`);
+		return message.channel.send('Sth went wrong');
 	},
 };

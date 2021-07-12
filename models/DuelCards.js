@@ -1,16 +1,16 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('user_cards', {
+    return sequelize.define('duel_cards', {
         user_id: DataTypes.STRING,
         card_id: DataTypes.STRING,
-        amount: {
+        posX: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            default: 0,
+            defaultValue: 0,
         },
-        inDeck: {
+        posY: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            default: 0,
+            defaultValue: 0,
         },
     }, {
         timestamps: false,
