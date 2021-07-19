@@ -3,6 +3,7 @@ from discord.ext import commands
 import youtube_dl
 import asyncio
 from youtube_search import YoutubeSearch
+import yaml
 
 # Music commands class
 class MusicCommands(commands.Cog, name = 'Music commands'):
@@ -25,7 +26,7 @@ class MusicCommands(commands.Cog, name = 'Music commands'):
 			return
 
 		# url_or_name is a youtube url
-		if 'youtube' in url_or_name:
+		if 'youtube.com' in url_or_name:
 			url = url_or_name
 		# url_or_name is a song name
 		else:
@@ -228,3 +229,106 @@ class MusicCommands(commands.Cog, name = 'Music commands'):
 			await ctx.send('Loop enabled.')
 		else:
 			await ctx.send('Loop disabled.')
+
+	@commands.group(name='favourites', aliases=['fav'], brief='Save list of favourite music links.')
+	async def favourites(self, ctx):
+		if ctx.invoked_subcommand is None:
+			await ctx.send('Invalid subcommand passed...')
+
+	@favourites.command(name = 'add', aliases = ['a'], brief = 'Find song and add it to favourites.')
+	async def add_song_to_favourites(self, ctx, *, songname_or_url):
+		data = self.get_player_data_from_file(ctx.author.id)
+
+		if 'youtube.com' in songname_or_url:
+			data['favourites'].append({'name': 'Song' + str(len(data['favourites'])), 'url': songname_or_url})
+		else:
+			search_result = YoutubeSearch(songname, max_results=1).to_dict()[0]
+			data['favourites'].append({'name': songname, 'url': 'https://www.youtube.com' + search_result['url_suffix']})
+
+		self.write_player_data_to_file(ctx.author.id, data)
+
+	@favourites.command(name = 'remove', aliases = ['r'], brief = 'Remove song from favourites by index number or name.')
+	async def remove_song_from_favourites(self, ctx, *, id_or_songname):
+		data = self.get_player_data_from_file(ctx.author.id)
+
+		try:
+			index = int(id_or_songname)
+		except ValueError:
+			try:
+				index = [song['name'] for song in data['favourites']].index(id_or_songname)
+			except ValueError:
+				index = -1
+
+		if index < 0 or index >= len(data['favourites']):
+			await ctx.send('Wrong song name or id.')
+		else:
+			data['favourites'].pop(index)
+
+		self.write_player_data_to_file(ctx.author.id, data)
+
+	@favourites.command(name = 'rename', aliases = ['n'], brief = 'Rename the song in your favourites.')
+	async def rename_song_in_favourites(self, ctx, song_index, *, new_name):
+		data = self.get_player_data_from_file(ctx.author.id)
+
+		try:
+			index = int(song_index)
+		except ValueError:
+			index = -1
+
+		if index < 0 or index >= len(data['favourites']):
+			await ctx.send('You must pass a valid song id.')
+		else:
+			data['favourites'][index]['name'] = new_name
+
+		self.write_player_data_to_file(ctx.author.id, data)
+
+	@favourites.command(name = 'list', aliases = ['l'], brief = 'List your favourite songs.')
+	async def list_favourite_songs(self, ctx):
+		data = self.get_player_data_from_file(ctx.author.id)
+
+		e = discord.Embed(title = ctx.author.name + '\'s favourite songs')
+		songs = data['favourites']
+		e.add_field(name = 'Id', value = '\n'.join([str(i) for i in range(len(songs))]))
+		e.add_field(name = 'Song', value = '\n'.join([song['name'] for song in songs]))
+		e.add_field(name = 'Url', value = '\n'.join([song['url'] for song in songs]))
+		await ctx.send(embed = e)
+
+	@favourites.command(name = 'play', aliases = ['p'], brief = 'Play song from your favourites.')
+	async def play_song_from_favourites(self, ctx, *, id_or_songname):
+		data = self.get_player_data_from_file(ctx.author.id)
+
+		try:
+			index = int(id_or_songname)
+		except ValueError:
+			try:
+				index = [song['name'] for song in data['favourites']].index(id_or_songname)
+			except ValueError:
+				index = -1
+
+		if index < 0 or index >= len(data['favourites']):
+			await ctx.send('Wrong song name or id.')
+		else:
+			await self.play(ctx, url_or_name = data['favourites'][index]['url'])
+
+	def get_player_data_from_file(self, id):
+		try:
+			with open('yaml/' + str(id) + '.yaml', 'r') as f:
+				data = yaml.load(f, Loader=yaml.SafeLoader)
+				if 'music' not in list(data.keys()):
+					data['music'] = {'favourites': []}
+				return data['music']
+		except FileNotFoundError:
+			data = {'music': {'favourites': []}}
+			with open('yaml/' + str(id) + '.yaml', 'w') as f:
+				yaml.dump(data, f)
+			return data['music']
+
+	def write_player_data_to_file(self, id, new_data):
+		data = {}
+
+		with open('yaml/' + str(id) + '.yaml', 'r') as f:
+			data = yaml.load(f, Loader=yaml.SafeLoader)
+			data['music'] = new_data
+
+		with open('yaml/' + str(id) + '.yaml', 'w') as f:
+			yaml.dump(data, f)
