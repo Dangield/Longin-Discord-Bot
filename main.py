@@ -14,6 +14,7 @@ import time
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
+PREFIX = os.getenv('COMMAND_PREFIX')
 
 # bot class
 class Bot(commands.Bot):
@@ -66,9 +67,9 @@ class Bot(commands.Bot):
 intents = discord.Intents.default()
 intents.members = True
 # initialization of activity
-activity = discord.Game(name = '?help')
+activity = discord.Game(name = PREFIX + 'help')
 # initialization of bot
-bot = Bot(command_prefix = '?', intents = intents, activity = activity)
+bot = Bot(command_prefix = PREFIX, intents = intents, activity = activity)
 # add categories
 bot.add_cog(TestCommands(bot))
 bot.add_cog(RPGCommands(bot))
