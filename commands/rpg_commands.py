@@ -114,8 +114,8 @@ class RPGCommands(commands.Cog, name = 'RPG commands'):
 			e.add_field(name = 'Functions', value = 'None' if not ch['functions'] else '\n'.join(list(ch['functions'].keys())))
 			await ctx.send(embed = e)
 
-	@character.command(name = 'change', aliases = ['ch'], brief = 'Choose currently used character.')
-	async def choose_current_character(self, ctx, name):
+	@character.command(name = 'select', aliases = ['s'], brief = 'Choose currently used character.')
+	async def select_current_character(self, ctx, name):
 		data = self.get_player_data_from_file(ctx.author.id)
 		if not data['characters']:
 			await ctx.send(ctx.author.mention + ', you have no characters.')
@@ -178,7 +178,7 @@ class RPGCommands(commands.Cog, name = 'RPG commands'):
 		else:
 			e = discord.Embed(title = data['current_character'])
 			ch = data['characters'][data['current_character']]
-			e.add_field(name = 'Attributes', value = 'None' if not ch['functions'] else '\n'.join([k + ': ' + str(ch['functions'][k]) for k in list(ch['functions'].keys())]))
+			e.add_field(name = 'Functions', value = 'None' if not ch['functions'] else '\n'.join([k + ': ' + str(ch['functions'][k]) for k in list(ch['functions'].keys())]))
 			await ctx.send(embed = e)
 
 	@function.command(name = 'execute', aliases = ['e'], brief = 'Execute the chosen function.')
@@ -202,10 +202,22 @@ class RPGCommands(commands.Cog, name = 'RPG commands'):
 	def get_player_data_from_file(self, id):
 		try:
 			with open('yaml/' + str(id) + '.yaml', 'r') as f:
-				return yaml.load(f, Loader=yaml.SafeLoader)
+				data = yaml.load(f, Loader=yaml.SafeLoader)
+				if 'rpg' not in list(data.keys()):
+					data['rpg'] = {'current_character': None, 'characters': {}}
+				return data['rpg']
 		except FileNotFoundError:
-			return {'current_character': None, 'characters': {}}
+			data = {'rpg': {'current_character': None, 'characters': {}}}
+			with open('yaml/' + str(id) + '.yaml', 'w') as f:
+				yaml.dump(data, f)
+			return data['rpg']
 
-	def write_player_data_to_file(self, id, data):
+	def write_player_data_to_file(self, id, new_data):
+		data = {}
+
+		with open('yaml/' + str(id) + '.yaml', 'r') as f:
+			data = yaml.load(f, Loader=yaml.SafeLoader)
+			data['rpg'] = new_data
+
 		with open('yaml/' + str(id) + '.yaml', 'w') as f:
 			yaml.dump(data, f)
