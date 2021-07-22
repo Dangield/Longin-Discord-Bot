@@ -242,8 +242,8 @@ class MusicCommands(commands.Cog, name = 'Music commands'):
 		if 'youtube.com' in songname_or_url:
 			data['favourites'].append({'name': 'Song' + str(len(data['favourites'])), 'url': songname_or_url})
 		else:
-			search_result = YoutubeSearch(songname, max_results=1).to_dict()[0]
-			data['favourites'].append({'name': songname, 'url': 'https://www.youtube.com' + search_result['url_suffix']})
+			search_result = YoutubeSearch(songname_or_url, max_results=1).to_dict()[0]
+			data['favourites'].append({'name': songname_or_url, 'url': 'https://www.youtube.com' + search_result['url_suffix']})
 
 		self.write_player_data_to_file(ctx.author.id, data)
 

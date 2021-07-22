@@ -102,7 +102,7 @@ class RPGCommands(commands.Cog, name = 'RPG commands'):
 		else:
 			await ctx.send(ctx.author.mention + ', you have the following characters: ' + ', '.join(list(data['characters'].keys())))
 
-	@character.command(name = 'current', aliases = ['curr'], brief = 'Show your current character.')
+	@character.command(name = 'current', aliases = ['curr', 'u'], brief = 'Show your current character.')
 	async def show_current_character(self, ctx):
 		data = self.get_player_data_from_file(ctx.author.id)
 		if data['current_character'] is None:
@@ -119,8 +119,23 @@ class RPGCommands(commands.Cog, name = 'RPG commands'):
 		data = self.get_player_data_from_file(ctx.author.id)
 		if not data['characters']:
 			await ctx.send(ctx.author.mention + ', you have no characters.')
+			return
 		if name in list(data['characters'].keys()):
 			data['current_character'] = name
+			self.write_player_data_to_file(ctx.author.id, data)
+		else:
+			await ctx.send(ctx.author.mention + ', you don\'t have character with such name.')
+
+	@character.command(name = 'remove', aliases = ['r'], brief = 'Remove one of your characters.')
+	async def remove_character(self, ctx, name):
+		data = self.get_player_data_from_file(ctx.author.id)
+		if not data['characters']:
+			await ctx.send(ctx.author.mention + ', you have no characters.')
+			return
+		if name in list(data['characters'].keys()):
+			data['characters'].pop(name)
+			if data['current_character'] is name:
+				data['current_character'] = None
 			self.write_player_data_to_file(ctx.author.id, data)
 		else:
 			await ctx.send(ctx.author.mention + ', you don\'t have character with such name.')
